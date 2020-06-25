@@ -20,6 +20,7 @@ var player2draw = {}
 var player2laser = {}
 
 var num_active = 0
+var global_slide_number = 0
 
 func _init():
 	print('[init] process started')
@@ -63,11 +64,16 @@ func _client_disconnected(id, was_clean=false) -> void:
 	print('[disconnect] Client %d disconnected (cleanly: %s)' % [id, str(was_clean)])
 	if id2player.has(id):
 		num_active -= 1
+		var player_number = id2player[id]
+		for i in range(MAX_PLAYERS):
+			if player2id[i] != 0 and i != player_number:
+				rpc_id(player2id[i], 'unintroduce_player', player_number, Vector2.ZERO, [], {'active': false, 'scale': 1})
 		remove_player_by_id(id)
 
 remote func change_slide(slide_number: int) -> void:
 	var id = get_tree().get_rpc_sender_id()
 	var player_number = id2player[id]
+	global_slide_number = slide_number
 	print('[player] ', player_number, ' changed to slide ', slide_number)
 	for i in range(MAX_PLAYERS):
 		if player2id[i] != 0 and i != player_number:
@@ -89,8 +95,12 @@ remote func update_player(pos, draw, laser):
 func send_players_to(player_number) -> void:
 	# send all other players to player
 	# --> so the player can display the others immediately
+	# also, send new player to all others
 	var id = player2id[player_number]
 	print('[server] sending players to player %d (id=%d)' % [player_number, id])
+	# first, send the new player to the current slide number
+	rpc_id(id, 'change_slide', global_slide_number)
+
 	for i in range(MAX_PLAYERS):
 		if player2id[i] != 0 and i != player_number:
 			rpc_id(id, 'introduce_player', i, player2pos[i], player2draw[i], player2laser[i])
@@ -106,7 +116,7 @@ func init_rooms() -> void:
 func init_player(i: int) -> void:
 	player2pos[i] = Vector2.ZERO
 	player2draw[i] = []
-	player2laser[i] = false
+	player2laser[i] = {'active': false, 'scale': 1.0}
 	player2id[i] = 0
 
 func remove_player_by_id(id):
@@ -123,7 +133,7 @@ func add_player(id) -> int:
 			self.player2id[player_number] = id
 			self.player2pos[player_number] = Vector2.ZERO
 			self.player2draw[player_number] = []
-			self.player2laser[player_number] = false
+			self.player2laser[player_number] = {'active': false, 'scale': 1.0}
 			return player_number
 	return -1
 
