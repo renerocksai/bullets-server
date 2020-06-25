@@ -17,6 +17,7 @@ var id2player = {}
 var player2id = {}
 var player2pos = {}
 var player2draw = {}
+var player2laser = {}
 
 var num_active = 0
 
@@ -42,14 +43,14 @@ func _process(delta: float) -> void:
 	if server.is_listening():
 		server.poll()
 
-func _client_connected(id, proto) -> void:
+func _client_connected(id, proto='unk') -> void:
 	print('[connect] Client %d connected to server with protocol %s!' % [id, proto])
 	num_active += 1
 	if num_active <= MAX_PLAYERS:
 		var player_number = add_player(id)
 		if player_number >= 0:
 			rpc_id(id, 'room_welcome', player_number)
-			print('[connect] Client %d is now to layer %d!' % [id, player_number])
+			print('[connect] Client %d is now player %d!' % [id, player_number])
 			send_players_to(player_number)
 			return
 	print('[connect] Client %d rejected, room is full!' % id)
@@ -73,24 +74,27 @@ remote func change_slide(slide_number: int) -> void:
 			var remote_id = player2id[i]
 			rpc_id(remote_id, 'change_slide', slide_number)
 
-remote func update_player(id, pos, draw):
+remote func update_player(pos, draw, laser):
+	var id = get_tree().get_rpc_sender_id()
 	var player_number = id2player[id]
-	print('[player] %d pos: %s draw_len: %d' % [player_number, str(pos), len(draw)])
+	print('[player] %d pos: %s ' % [player_number, str(pos)])
 	player2pos[player_number] = pos
 	player2draw[player_number] = draw
+	player2laser[player_number] = laser
 	for i in range(MAX_PLAYERS):
 		if player2id[i] != 0 and i != player_number:
 			var remote_id = player2id[i]
-			rpc_id(remote_id, 'update_player', pos, draw)
+			rpc_id(remote_id, 'update_player', player_number, pos, draw, laser)
 
 func send_players_to(player_number) -> void:
 	# send all other players to player
 	# --> so the player can display the others immediately
-	print('[server] sending players to player %d' % player_number)
 	var id = player2id[player_number]
+	print('[server] sending players to player %d (id=%d)' % [player_number, id])
 	for i in range(MAX_PLAYERS):
 		if player2id[i] != 0 and i != player_number:
-			rpc_id(id, 'update_player', i, player2pos[i], player2draw[i])
+			rpc_id(id, 'introduce_player', i, player2pos[i], player2draw[i], player2laser[i])
+			rpc_id(player2id[i], 'introduce_player', player_number, player2pos[player_number], player2draw[player_number], player2laser[player_number])
 	return
 
 
@@ -102,6 +106,7 @@ func init_rooms() -> void:
 func init_player(i: int) -> void:
 	player2pos[i] = Vector2.ZERO
 	player2draw[i] = []
+	player2laser[i] = false
 	player2id[i] = 0
 
 func remove_player_by_id(id):
@@ -118,6 +123,7 @@ func add_player(id) -> int:
 			self.player2id[player_number] = id
 			self.player2pos[player_number] = Vector2.ZERO
 			self.player2draw[player_number] = []
+			self.player2laser[player_number] = false
 			return player_number
 	return -1
 
