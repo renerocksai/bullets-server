@@ -22,7 +22,7 @@ class Player:
 		self.id = id
 		pos = Vector2.ZERO
 		drawing = []
-		laser = {'active': false, 'scale': 1.0}
+		laser = {'active': false, 'scale': Vector2(1,1)}
 
 class Room:
 	var name: String
@@ -148,7 +148,7 @@ func _client_disconnected(id, was_clean=false) -> void:
 		var player_number = player.player_number
 		for other_player in room.players:
 			if other_player.id != -1 and other_player.player_number != player_number:
-				rpc_id(other_player.id, 'unintroduce_player', player_number, Vector2.ZERO, [], {'active': false, 'scale': 1})
+				rpc_id(other_player.id, 'unintroduce_player', player_number, Vector2.ZERO, [], {'active': false, 'scale': Vector2(1,1)})
 		rooms.remove_player(player)
 
 remote func enter_room(room: String):
