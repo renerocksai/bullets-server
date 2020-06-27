@@ -113,6 +113,13 @@ func _init():
 ####### CONNECTION MANAGEMENT
 func _ready() -> void:
 	server = WebSocketServer.new()
+	var dir = Directory.new()
+	if dir.file_exists('privkey.key'):
+		print('Loading key file!')
+		server.private_key = load("privkey.key")
+	if dir.file_exists('fullchain.crt'):
+		print('Loading cert file1')
+		server.ssl_certificate = load("fullchain.crt") 
 	var err = server.listen(PORT, PoolStringArray(), true)
 	if err != OK:
 		print('[server] Unable to listen on port %d' % PORT)
