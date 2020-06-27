@@ -114,12 +114,24 @@ func _init():
 func _ready() -> void:
 	server = WebSocketServer.new()
 	var dir = Directory.new()
-	if dir.file_exists('privkey.key'):
-		print('Loading key file!')
-		server.private_key = load("privkey.key")
-	if dir.file_exists('fullchain.crt'):
-		print('Loading cert file!')
-		server.ssl_certificate = load("fullchain.crt") 
+	var args = OS.get_cmdline_args()
+	var keyfile = 'privkey.key'
+	var certfile = 'fullchain.crt'
+	for arg in args:
+		if arg.begins_with('--keyfile='):
+			keyfile = arg.split('=')[-1]
+		elif arg.begins_with('--certfile='):
+			certfile = arg.split('=')[-1]
+	if dir.file_exists(keyfile):
+		print('Loading key file %s !' % keyfile)
+		server.private_key = load(keyfile)
+	else:
+		print('Key file %s does not exist. This might be intentional for non-SSL deployments.' % keyfile)
+	if dir.file_exists(certfile):
+		print('Loading cert file %s !' % certfile)
+		server.ssl_certificate = load(certfile) 
+	else:
+		print('Cert file %s does not exist. This might be intentional for non-SSL deployments.' % certfile)
 	var err = server.listen(PORT, PoolStringArray(), true)
 	if err != OK:
 		print('[server] Unable to listen on port %d' % PORT)
