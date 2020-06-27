@@ -118,7 +118,7 @@ func _ready() -> void:
 		print('Loading key file!')
 		server.private_key = load("privkey.key")
 	if dir.file_exists('fullchain.crt'):
-		print('Loading cert file1')
+		print('Loading cert file!')
 		server.ssl_certificate = load("fullchain.crt") 
 	var err = server.listen(PORT, PoolStringArray(), true)
 	if err != OK:
