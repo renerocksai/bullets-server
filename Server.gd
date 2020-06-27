@@ -115,6 +115,7 @@ func _ready() -> void:
 	server = WebSocketServer.new()
 	var dir = Directory.new()
 	var args = OS.get_cmdline_args()
+	var port = PORT
 	var keyfile = 'privkey.key'
 	var certfile = 'fullchain.crt'
 	for arg in args:
@@ -122,6 +123,12 @@ func _ready() -> void:
 			keyfile = arg.split('=')[-1]
 		elif arg.begins_with('--certfile='):
 			certfile = arg.split('=')[-1]
+		elif arg.begins_with('--port='):
+			var port_arg = arg.split('=')[-1]
+			if port_arg.is_valid_integer():
+				port = port_arg.to_int()
+			else:
+				print('Port %s is not a valid number!' % port_arg)
 	if dir.file_exists(keyfile):
 		print('Loading key file %s !' % keyfile)
 		server.private_key = load(keyfile)
@@ -132,15 +139,15 @@ func _ready() -> void:
 		server.ssl_certificate = load(certfile) 
 	else:
 		print('Cert file %s does not exist. This might be intentional for non-SSL deployments.' % certfile)
-	var err = server.listen(PORT, PoolStringArray(), true)
+	var err = server.listen(port, PoolStringArray(), true)
 	if err != OK:
-		print('[server] Unable to listen on port %d' % PORT)
+		print('[server] Unable to listen on port %d' % port)
 		set_process(false)
 		return
 	get_tree().set_network_peer(server)
 	get_tree().connect("network_peer_connected", self, "_client_connected")
 	get_tree().connect("network_peer_disconnected", self, "_client_disconnected")
-	print('[server] Listening on port %d' % PORT)
+	print('[server] Listening on port %d' % port)
 
 func _process(delta: float) -> void:
 	if server.is_listening():
