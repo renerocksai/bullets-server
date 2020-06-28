@@ -199,6 +199,16 @@ remote func change_slide(slide_number: int) -> void:
 			if other_player.id != -1 and other_player.id != id:
 				rpc_id(other_player.id, 'change_slide', slide_number)
 
+remote func click(node_path: String) -> void:
+	var id = get_tree().get_rpc_sender_id()
+	var player = rooms.find_player_by_id(id)
+	var room = rooms.find_room_by_id(id)
+	if room != null and player != null:
+		print('[player] ', player.player_number, ' clicked ', node_path, ' in room ', room.name)
+		for other_player in room.players:
+			if other_player.id != -1 and other_player.id != id:
+				rpc_id(other_player.id, 'clicked', node_path)
+
 remote func update_player(pos, draw, laser):
 	var id = get_tree().get_rpc_sender_id()
 	var player = rooms.find_player_by_id(id)
