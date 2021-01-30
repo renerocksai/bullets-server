@@ -9,7 +9,7 @@ class Player:
 	var id : int
 	var player_number: int
 	var room: String
-	var pos : Vector2 
+	var pos : Vector2
 	var drawing: Array
 	var laser: Dictionary
 
@@ -17,7 +17,7 @@ class Player:
 		self.player_number = player_number
 		self.room = room_name
 		reset()
-	
+
 	func reset(id = -1):
 		self.id = id
 		pos = Vector2.ZERO
@@ -26,7 +26,7 @@ class Player:
 
 class Room:
 	var name: String
-	var players : Array 
+	var players : Array
 	var slide_number: int
 
 	func _init(name: String):
@@ -62,7 +62,7 @@ class Rooms:
 
 	func _init():
 		rooms = {}
-	
+
 	func find_player_by_id(id: int):
 		if id2player.has(id):
 			return id2player[id]
@@ -136,7 +136,7 @@ func _ready() -> void:
 		print('Key file %s does not exist. This might be intentional for non-SSL deployments.' % keyfile)
 	if dir.file_exists(certfile):
 		print('Loading cert file %s !' % certfile)
-		server.ssl_certificate = load(certfile) 
+		server.ssl_certificate = load(certfile)
 	else:
 		print('Cert file %s does not exist. This might be intentional for non-SSL deployments.' % certfile)
 	var err = server.listen(port, PoolStringArray(), true)
