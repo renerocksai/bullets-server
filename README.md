@@ -47,7 +47,7 @@ For SSL.
 - run `docker load -i bullets-server.docker.tar`
 
 ### Run the server
-- run `./run_container.sh` as user (bullets)
+- run `./run_container.sh your-host.your-domain.com` as user (bullets)
 - you might get prompted for your password, to execute sudo commands
 
 ## In your bullets presentation
