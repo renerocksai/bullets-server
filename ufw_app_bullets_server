@@ -1,0 +1,5 @@
+# file: /etc/ufw/applications.d/bullets-server
+[bullets-server]
+title=Bullets Server
+description=Bullets Multiplayer Server
+ports=9000

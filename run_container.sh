@@ -14,4 +14,4 @@ mkdir -p keys
 sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem keys/
 sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem keys/
 sudo chown -R $USER:$USER keys
-docker run -ip 9000:9000 -v $(pwd)/keys:/keys bullets-server:latest 
+docker run --rm -p 9000:9000 -v $(pwd)/keys:/keys bullets-server:latest 
