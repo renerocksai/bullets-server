@@ -38,6 +38,7 @@ For SSL.
 - `sudo snap install --classic certbot`
 - `sudo certbot certonly --standalone`
 
+#### Note: Check out [the certbot site](https://certbot.eff.org/lets-encrypt/ubuntufocal-other) to set up auto renewal. TODO: Write scripts that restart the container upon renewal!
 
 ### Run the server
 - run `./run_container.sh` as user (bullets)
