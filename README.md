@@ -6,10 +6,10 @@ Here is how to build it on your machine and deploy it to a fresh Ubuntu install,
 ## On your machine
 
 - clone the repository
-- run `build_docker.sh`
+- run `./build_docker.sh`
     - this will buld a docker image that runs the godot server after having exported the godot project to Linux/X11
 - deploy to your server via ssh:
-    - run `deploy_ssh server-name`
+    - run `./deploy_ssh server-name`
         - replace server-name with the name of your server (or the alias in your ssh config)
         - this will copy the docker image and the runner script to your server
 
