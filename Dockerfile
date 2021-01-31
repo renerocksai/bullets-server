@@ -1,3 +1,5 @@
+# taken from  https://github.com/poszu/godot-servers-k8s
+
 ARG GODOT_VERSION=3.2.3
 ARG GODOT_PROJECT_NAME
 ARG GODOT_EXPORT_PRESET=Linux/X11
@@ -33,6 +35,7 @@ ARG GODOT_PROJECT_NAME
 WORKDIR /app
 COPY --from=godot-server /bin/godot-server server
 COPY --from=build /src/export/server.pck server.pck
+COPY start-bullets-server.sh .
 
 EXPOSE 9000
 
@@ -40,4 +43,7 @@ EXPOSE 9000
 RUN mkdir -p ~/.config/godot \
     && mkdir -p ~/.local/share/godot/app_userdata/${GODOT_PROJECT_NAME} 
 
-ENTRYPOINT ["/app/server"]
+VOLUME /keys
+
+#ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["/app/start-bullets-server.sh"]

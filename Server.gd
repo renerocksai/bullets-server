@@ -106,7 +106,7 @@ var num_active = 0
 var rooms: Rooms
 
 func _init():
-	print('[init] process started')
+	printerr('[init] process started')
 	rooms = Rooms.new()
 
 
@@ -128,45 +128,45 @@ func _ready() -> void:
 			if port_arg.is_valid_integer():
 				port = port_arg.to_int()
 			else:
-				print('Port %s is not a valid number!' % port_arg)
+				printerr('Port %s is not a valid number!' % port_arg)
 	if dir.file_exists(keyfile):
-		print('Loading key file %s !' % keyfile)
+		printerr('Loading key file %s !' % keyfile)
 		server.private_key = load(keyfile)
 	else:
-		print('Key file %s does not exist. This might be intentional for non-SSL deployments.' % keyfile)
+		printerr('Key file %s does not exist. This might be intentional for non-SSL deployments.' % keyfile)
 	if dir.file_exists(certfile):
-		print('Loading cert file %s !' % certfile)
+		printerr('Loading cert file %s !' % certfile)
 		server.ssl_certificate = load(certfile)
 	else:
-		print('Cert file %s does not exist. This might be intentional for non-SSL deployments.' % certfile)
+		printerr('Cert file %s does not exist. This might be intentional for non-SSL deployments.' % certfile)
 	var err = server.listen(port, PoolStringArray(), true)
 	if err != OK:
-		print('[server] Unable to listen on port %d' % port)
+		printerr('[server] Unable to listen on port %d' % port)
 		set_process(false)
 		return
 	get_tree().set_network_peer(server)
 	get_tree().connect("network_peer_connected", self, "_client_connected")
 	get_tree().connect("network_peer_disconnected", self, "_client_disconnected")
-	print('[server] Listening on port %d' % port)
+	printerr('[server] Listening on port %d' % port)
 
 func _process(delta: float) -> void:
 	if server.is_listening():
 		server.poll()
 
 func _client_connected(id, proto='unk') -> void:
-	print('[connect] Client %d connected to server with protocol %s!' % [id, proto])
+	printerr('[connect] Client %d connected to server with protocol %s!' % [id, proto])
 	num_active += 1
 	if num_active <= MAX_PLAYERS:
 		# OK, nothing more to do, wait for enter_room
 		return
-	print('[connect] Client %d rejected, server is full!' % id)
+	printerr('[connect] Client %d rejected, server is full!' % id)
 	rpc_id(id, 'room_full')
 
 func _exit_tree():
 	server.stop()
 
 func _client_disconnected(id, was_clean=false) -> void:
-	print('[disconnect] Client %d disconnected (cleanly: %s)' % [id, str(was_clean)])
+	printerr('[disconnect] Client %d disconnected (cleanly: %s)' % [id, str(was_clean)])
 	var player: Player = rooms.find_player_by_id(id)
 	if player != null:
 		var room = rooms.find_room_by_id(id)
@@ -182,10 +182,10 @@ remote func enter_room(room: String):
 	var player = rooms.add_player(id, room)
 	if player != null:
 		rpc_id(id, 'room_welcome', player.player_number)
-		print('[connect] Client %d is now player %d in room %s!' % [id, player.player_number, room])
+		printerr('[connect] Client %d is now player %d in room %s!' % [id, player.player_number, room])
 		send_players_to(player)
 		return
-	print('[connect] Client %d rejected, room %s is full!' % [id, room])
+	printerr('[connect] Client %d rejected, room %s is full!' % [id, room])
 	rpc_id(id, 'room_full')
 
 remote func change_slide(slide_number: int) -> void:
@@ -194,7 +194,7 @@ remote func change_slide(slide_number: int) -> void:
 	var room = rooms.find_room_by_id(id)
 	if room != null and player != null:
 		room.slide_number = slide_number
-		print('[player] ', player.player_number, ' changed to slide ', slide_number, ' in room ', room.name)
+		printerr('[player] ', player.player_number, ' changed to slide ', slide_number, ' in room ', room.name)
 		for other_player in room.players:
 			if other_player.id != -1 and other_player.id != id:
 				rpc_id(other_player.id, 'change_slide', slide_number)
@@ -204,7 +204,7 @@ remote func click(node_path: String) -> void:
 	var player = rooms.find_player_by_id(id)
 	var room = rooms.find_room_by_id(id)
 	if room != null and player != null:
-		print('[player] ', player.player_number, ' clicked ', node_path, ' in room ', room.name)
+		printerr('[player] ', player.player_number, ' clicked ', node_path, ' in room ', room.name)
 		for other_player in room.players:
 			if other_player.id != -1 and other_player.id != id:
 				rpc_id(other_player.id, 'clicked', node_path)
@@ -214,7 +214,7 @@ remote func update_player(pos, draw, laser):
 	var player = rooms.find_player_by_id(id)
 	var room = rooms.find_room_by_id(id)
 	if room != null and player != null:
-		print('[player] %d room %s pos: %s ' % [player.player_number, player.room, str(pos)])
+		printerr('[player] %d room %s pos: %s ' % [player.player_number, player.room, str(pos)])
 		player.pos = pos
 		player.drawing = draw
 		player.laser = laser
@@ -228,7 +228,7 @@ func send_players_to(player) -> void:
 	# also, send new player to all others
 	var id = player.id
 	var room = rooms.find_room_by_id(id)
-	print('[server] sending players to player %d (id=%d) in room %s' % [player.player_number, id, room.name])
+	printerr('[server] sending players to player %d (id=%d) in room %s' % [player.player_number, id, room.name])
 	# first, send the new player to the current slide number
 	rpc_id(id, 'change_slide', room.slide_number)
 
